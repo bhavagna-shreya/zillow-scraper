@@ -1,0 +1,210 @@
+# 1. Create a Virtual Environment
+
+bash
+python -m venv venv
+
+Activate it:
+
+On Windows:
+
+  bash
+  venv\Scripts\activate
+  
+
+---
+
+# 2. Upgrade pip
+
+bash
+pip install --upgrade pip
+
+
+---
+
+# 3.Install Scrapy
+
+bash
+pip install scrapy
+
+# 4. Install Playwright + Scrapy Playwright Middleware
+
+bash
+pipinstall playwright scrapy-playwright
+
+
+---
+
+# 5.Install Playwright Browsers
+
+After installing the Playwright package, run this to download Chromium, Firefox, and WebKit:
+
+bash
+playwright install
+
+
+
+-->document.getElementById() — a common DOM (Document Object Model) method in JavaScript to access HTML elements.
+
+-->JSON.parse() — a JavaScript method to convert a JSON-formatted string into a native JS object.
+
+-->console.log() — standard JavaScript method to print output to the browser’s console.
+
+
+1. Open Scrapy Shell with Playwright
+
+
+
+scrapy shell --set PLAYWRIGHT_BROWSER_TYPE=chromium --set DOWNLOAD_HANDLERS="{'http': 'scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler','https': 'scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler'}" "https://www.zillow.com/phoenix-az/1_p/"
+
+2. Extract the embedded JSON from the script
+
+script = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
+
+
+3. Parse the JSON
+
+import json
+data = json.loads(script)
+
+
+4. Access the listings
+
+listings = data["props"]["pageProps"]["searchPageState"]["cat1"]["searchResults"]["listResults"]
+
+
+5. View the results
+
+for home in listings:
+    print({
+        "address": home.get("address"),
+        "price": home.get("price"),
+        "beds": home.get("beds"),
+        "baths": home.get("baths"),
+        "area": home.get("area"),
+        "url": f"https://www.zillow.com{home.get('detailUrl')}"
+    })
+
+
+6. Repeat for next page
+
+scrapy shell "https://www.zillow.com/phoenix-az/2_p/"
+
+This Python script is a **Scrapy spider** that automatically scrapes real estate listings from **Zillow** using **Playwright** to handle JavaScript-rendered pages. Here's a breakdown of how it works:
+
+---
+
+#Imports and Setup
+
+python
+import scrapy
+import json
+
+
+scrapy: Web scraping framework.
+json: To parse embedded JSON data from the HTML.
+
+---
+
+#Spider Configuration**
+
+```python
+class ZilspiderSpider(scrapy.Spider):
+    name = "zillow_playwright"
+    allowed_domains = ["zillow.com"]
+```
+
+name: Unique identifier to run the spider.
+allowed_domains: Prevents the spider from crawling external domains.
+
+---
+
+#Automated Page Requests
+
+python
+def start_requests(self):
+    for page in range(1, 21):  # Scrape pages 1 to 20
+        url = f"https://www.zillow.com/phoenix-az/{page}_p/"
+        yield scrapy.Request(
+            url=url,
+            callback=self.parse,
+            meta={"playwright": True}
+        )
+
+
+ Loops through pages 1 to 20.
+ Appends _p/ to access specific page numbers.
+ Uses meta={"playwright": True}` to enable JavaScript rendering with Playwright.
+
+---
+
+#Parse and Extract Data
+python
+def parse(self, response):
+    script = response.xpath("//script[@id='__NEXT_DATA__']/text()").get()
+
+
+Scrapes the <script> tag containing JSON (__NEXT_DATA__) which holds all listing info.
+
+---
+
+#Process JSON and Yield Listings**
+
+python
+data = json.loads(script)
+listings = (
+    data.get("props", {})
+        .get("pageProps", {})
+        .get("searchPageState", {})
+        .get("cat1", {})
+        .get("searchResults", {})
+        .get("listResults", [])
+)
+
+
+# Navigates deeply nested JSON to get the `listResults` array with all listings.
+
+---
+
+#Extracted Fields Per Home
+
+python
+for home in listings:
+    yield {
+        "address": home.get("address"),
+        "price": home.get("price"),
+        "beds": home.get("beds"),
+        "baths": home.get("baths"),
+        "area": home.get("area"),
+        "statusText": home.get("statusText"),
+        "latLong": home.get("latLong"),
+        "livingArea": home.get("livingArea"),
+        "homeType": home.get("homeType"),
+        "yearBuilt": home.get("yearBuilt"),
+        "lotAreaUnit": home.get("lotAreaUnit"),
+        "lotAreaValue": home.get("lotAreaValue"),
+        "zipcode": home.get("zipcode"),
+        "city": home.get("city"),
+        "state": home.get("state"),
+        "country": home.get("country"),
+        "url": f"https://www.zillow.com{home.get('detailUrl')}"
+    }
+
+
+* Collects all important fields: location, size, price, type, and URL.
+* `yield` makes it stream data one by one into the output format (like CSV, JSON).
+
+
+
+When you run:
+
+```bash
+scrapy crawl zillow_playwright -o zillow_listings.csv
+```
+
+It:
+
+ Automatically scrapes 20 pages of Zillow listings for Phoenix, AZ.
+ Extracts detailed data per property.
+ Saves the output to zillow_listings.csv.
+
+
