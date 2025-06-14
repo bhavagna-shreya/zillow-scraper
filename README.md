@@ -1,23 +1,24 @@
+
 # Zillow Scraper using Scrapy
 
 This Scrapy project is designed to extract real estate listing data from [Zillow](https://www.zillow.com/) for the New York, NY area (or any city of your choice). It handles pagination, extracts key listing features, and supports CSV export.
 
 ## Project Structure
 
+```
+
 zilscraper/
 ├── zilscraper/
-│ ├── spiders/
-│ │ └── zilspider.py
-│ ├── items.py
-│ ├── middlewares.py
-│ ├── pipelines.py
-│ ├── settings.py
-├── zillow_listings.csv
+│   ├── spiders/
+│   │   └── zilspider.py
+│   ├── items.py
+│   ├── middlewares.py
+│   ├── pipelines.py
+│   ├── settings.py
+├── zillow\_listings.csv
 └── scrapy.cfg
 
-markdown
-Copy
-Edit
+````
 
 ## What It Does
 
@@ -65,42 +66,42 @@ This project is intended for educational and research purposes only. Please cons
 ## Setup Instructions
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/yourusername/zillow-scraper.git
 cd zillow-scraper
-Create and activate a virtual environment:
+````
 
-bash
-Copy
-Edit
+2. Create and activate a virtual environment:
+
+```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-Install dependencies:
+```
 
-bash
-Copy
-Edit
+3. Install dependencies:
+
+```bash
 pip install scrapy
-Run the spider:
+```
 
-bash
-Copy
-Edit
+4. Run the spider:
+
+```bash
 scrapy crawl zilspider
-Future Improvements
-Store scraped data in a database
+```
 
-Add search filters (e.g., price range, bed/bath count)
+## Future Improvements
 
-Add Playwright or Selenium support for JS-heavy pages
+* Store scraped data in a database
+* Add search filters (e.g., price range, bed/bath count)
+* Add Playwright or Selenium support for JS-heavy pages
+* Automate periodic scraping with cron or Scrapyd
 
-Automate periodic scraping with cron or Scrapyd
+## Author
 
-Author
-Bhavagna Shreya Bandaru
-Email: bbandar5@asu.edu
-Portfolio: https://bhavagna-shreya-portfolio.vercel.app
+**Bhavagna Shreya Bandaru**
+Email: [bbandar5@asu.edu](mailto:bbandar5@asu.edu)
+Portfolio: [https://bhavagna-shreya-portfolio.vercel.app](https://bhavagna-shreya-portfolio.vercel.app)
 
-go
-Copy
-Edit
+
